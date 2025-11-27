@@ -128,7 +128,7 @@
         // This helps guarantee that ReactDOM is defined by the time it's accessed.
         window.onload = function() {
             // React and ReactDOM are now guaranteed to be available here
-            const { useState, useEffect, useRef, createContext, useContext } = React;
+            const { useState, useEffect, createContext, useContext } = React;
             const ReactDOM = window.ReactDOM; // Explicitly get ReactDOM from the window object
 
             // Access Firebase functions and config from the global window object
@@ -1777,7 +1777,6 @@
                 const [loadingTemplate, setLoadingTemplate] = useState(true);
                 const [isEditing, setIsEditing] = useState(false);
                 const [editableReportData, setEditableReportData] = useState(reportData);
-                const reportRef = useRef(null);
                 const { showToast } = useContext(ToastContext); // Use ToastContext
 
                 useEffect(() => {
@@ -1925,35 +1924,6 @@
                     }, 100);
                 };
 
-                const handleDownload = () => {
-                    const printable = reportRef.current ? reportRef.current.outerHTML : '';
-                    const printStyles = document.querySelector('style')?.innerHTML || '';
-                    const safeTitle = (editableReportData?.reportDetails?.subject || 'billing-report').replace(/[^a-z0-9]+/gi, '_');
-                    const htmlDocument = `<!DOCTYPE html>
-                        <html lang="en">
-                        <head>
-                            <meta charset="UTF-8" />
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                            <title>Billing Report - ${editableReportData?.project?.projectName || 'Project'}</title>
-                            <script src="https://cdn.tailwindcss.com"></script>
-                            <style>${printStyles}</style>
-                        </head>
-                        <body class="bg-gray-100">
-                            ${printable}
-                        </body>
-                        </html>`;
-                    const blob = new Blob([htmlDocument], { type: 'text/html' });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `${safeTitle || 'billing-report'}.html`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                    showToast('Report downloaded!', 'success');
-                };
-
                 const handleBackToForm = () => {
                     setGeneratedReportData(editableReportData); // Pass current edited data back to the form
                     setView('createBilling');
@@ -1974,7 +1944,7 @@
 
 
                 return (
-                    <div ref={reportRef} className="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print-area">
+                    <div className="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print-area">
                         {/* Report Header */}
                         <div className="text-center mb-10 pb-4 relative">
                             {/* Logo added here */}
@@ -2311,12 +2281,6 @@
                                         Save Report
                                     </button>
                                     <button
-                                        onClick={handleDownload}
-                                        className="px-6 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 mr-4"
-                                    >
-                                        Download Report
-                                    </button>
-                                    <button
                                         onClick={handlePrint}
                                         className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                                     >
@@ -2336,12 +2300,6 @@
                                         className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 mr-4"
                                     >
                                         Cancel Edit
-                                    </button>
-                                    <button
-                                        onClick={handleDownload}
-                                        className="px-6 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 mr-4"
-                                    >
-                                        Download
                                     </button>
                                     <button
                                         onClick={handlePrint}
@@ -2875,7 +2833,6 @@
                 const { db, userId, isAuthReady } = useFirebase();
                 const [template, setTemplate] = useState(null);
                 const [loadingTemplate, setLoadingTemplate] = useState(true);
-                const reportRef = useRef(null);
                 const { showToast } = useContext(ToastContext); // Use ToastContext
 
                 useEffect(() => {
@@ -2982,38 +2939,9 @@
                     }, 100);
                 };
 
-                const handleDownload = () => {
-                    const printable = reportRef.current ? reportRef.current.outerHTML : '';
-                    const printStyles = document.querySelector('style')?.innerHTML || '';
-                    const safeTitle = (`expense-report-${reportData?.project?.projectName || 'project'}-${reportData?.reportDate || ''}`).replace(/[^a-z0-9]+/gi, '_');
-                    const htmlDocument = `<!DOCTYPE html>
-                        <html lang="en">
-                        <head>
-                            <meta charset="UTF-8" />
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                            <title>Expense Report - ${reportData?.project?.projectName || 'Project'}</title>
-                            <script src="https://cdn.tailwindcss.com"></script>
-                            <style>${printStyles}</style>
-                        </head>
-                        <body class="bg-gray-100">
-                            ${printable}
-                        </body>
-                        </html>`;
-                    const blob = new Blob([htmlDocument], { type: 'text/html' });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `${safeTitle || 'expense-report'}.html`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                    showToast('Expense report downloaded!', 'success');
-                };
-
 
                 return (
-                    <div ref={reportRef} className="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print-area">
+                    <div className="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto my-8 print:shadow-none print:p-0 print-area">
                         {/* Report Header */}
                         <div className="text-center mb-10 pb-4 relative">
                             {template?.logoUrl && (
@@ -3107,12 +3035,6 @@
                                 className="px-6 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 mr-4"
                             >
                                 Save Report
-                            </button>
-                            <button
-                                onClick={handleDownload}
-                                className="px-6 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 mr-4"
-                            >
-                                Download Report
                             </button>
                             <button
                                 onClick={handlePrint}
